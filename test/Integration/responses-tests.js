@@ -1,10 +1,10 @@
+'use strict';
 const Code = require('code');
 const Joi = require('joi');
 const Lab = require('lab');
 const Helper = require('../helper.js');
 const Defaults = require('../../lib/defaults.js');
 const Responses = require('../../lib/responses.js');
-const Validate = require('../../lib/validate.js');
 
 const expect = Code.expect;
 const lab = (exports.lab = Lab.script());
@@ -99,7 +99,7 @@ lab.experiment('responses', () => {
         }
     };
 
-    lab.test('using hapi response.schema', async() => {
+    lab.test('using hapi response.schema', done => {
         const routes = {
             method: 'POST',
             path: '/store/',
@@ -122,19 +122,21 @@ lab.experiment('responses', () => {
             }
         };
 
-        const server = await Helper.createServer({}, routes);
-        const response = await server.inject({ url: '/swagger.json' });
-        expect(
-            response.result.paths['/store/'].post.responses
-        ).to.exist();
-        const isValid = await Validate.test(response.result);
-        expect(isValid).to.be.true();
-
+        Helper.createServer({}, routes, (err, server) => {
+            server.inject({ url: '/swagger.json' }, function(response) {
+                expect(err).to.equal(null);
+                //console.log(JSON.stringify(response.result));
+                expect(
+                    response.result.paths['/store/'].post.responses
+                ).to.exist();
+                Helper.validate(response, done, expect);
+            });
+        });
     });
 
     lab.test(
         'conditional variables produce `required = true`, not `required = [...]`',
-        async() => {
+        done => {
             const routes = {
                 method: 'POST',
                 path: '/store/',
@@ -155,18 +157,21 @@ lab.experiment('responses', () => {
                 }
             };
 
-            const server = await Helper.createServer({}, routes);
-            const response = await server.inject({ url: '/swagger.json' });
-            expect(
-                response.result.paths['/store/'].post.parameters[0]
-                    .required
-            ).to.equal(true);
-            const isValid = await Validate.test(response.result);
-            expect(isValid).to.be.true();
+            Helper.createServer({}, routes, (err, server) => {
+                server.inject({ url: '/swagger.json' }, function(response) {
+                    expect(err).to.equal(null);
+                    //console.log(JSON.stringify(response.result));
+                    expect(
+                        response.result.paths['/store/'].post.parameters[0]
+                            .required
+                    ).to.equal(true);
+                    Helper.validate(response, done, expect);
+                });
+            });
         }
     );
 
-    lab.test('using hapi response.schema with child objects', async() => {
+    lab.test('using hapi response.schema with child objects', done => {
         const routes = {
             method: 'POST',
             path: '/store/',
@@ -189,16 +194,18 @@ lab.experiment('responses', () => {
             }
         };
 
-        const server = await Helper.createServer({}, routes);
-        const response = await server.inject({ url: '/swagger.json' });
-        expect(response.result.definitions.List).to.exist();
-        expect(response.result.definitions.Sum).to.exist();
-        const isValid = await Validate.test(response.result);
-        expect(isValid).to.be.true();
-
+        Helper.createServer({}, routes, (err, server) => {
+            server.inject({ url: '/swagger.json' }, function(response) {
+                //console.log(JSON.stringify(response.result.definitions.List.properties.items));
+                expect(err).to.equal(null);
+                expect(response.result.definitions.List).to.exist();
+                expect(response.result.definitions.Sum).to.exist();
+                Helper.validate(response, done, expect);
+            });
+        });
     });
 
-    lab.test('using hapi response.status', async() => {
+    lab.test('using hapi response.status', done => {
         const routes = {
             method: 'POST',
             path: '/store/',
@@ -224,28 +231,30 @@ lab.experiment('responses', () => {
             }
         };
 
-        const server = await Helper.createServer({}, routes);
-        const response = await server.inject({ url: '/swagger.json' });
-        expect(
-            response.result.paths['/store/'].post.responses[200]
-        ).to.exist();
-        expect(
-            response.result.paths['/store/'].post.responses[400]
-                .description
-        ).to.equal('Bad Request');
-        expect(
-            response.result.paths['/store/'].post.responses[400].headers
-        ).to.equal(headers);
-        expect(
-            response.result.paths['/store/'].post.responses[400]
-                .examples
-        ).to.equal(examples);
-        const isValid = await Validate.test(response.result);
-        expect(isValid).to.be.true();
-
+        Helper.createServer({}, routes, (err, server) => {
+            server.inject({ url: '/swagger.json' }, function(response) {
+                expect(err).to.equal(null);
+                //console.log(JSON.stringify(response.result));
+                expect(
+                    response.result.paths['/store/'].post.responses[200]
+                ).to.exist();
+                expect(
+                    response.result.paths['/store/'].post.responses[400]
+                        .description
+                ).to.equal('Bad Request');
+                expect(
+                    response.result.paths['/store/'].post.responses[400].headers
+                ).to.equal(headers);
+                expect(
+                    response.result.paths['/store/'].post.responses[400]
+                        .examples
+                ).to.equal(examples);
+                Helper.validate(response, done, expect);
+            });
+        });
     });
 
-    lab.test('using hapi response.status without 200', async() => {
+    lab.test('using hapi response.status without 200', done => {
         const routes = {
             method: 'POST',
             path: '/store/',
@@ -270,28 +279,30 @@ lab.experiment('responses', () => {
             }
         };
 
-        const server = await Helper.createServer({}, routes);
-        const response = await server.inject({ url: '/swagger.json' });
-        expect(
-            response.result.paths['/store/'].post.responses[200]
-        ).to.equal(undefined);
-        expect(
-            response.result.paths['/store/'].post.responses[400]
-                .description
-        ).to.equal('Bad Request');
-        expect(
-            response.result.paths['/store/'].post.responses[400].headers
-        ).to.equal(headers);
-        expect(
-            response.result.paths['/store/'].post.responses[400]
-                .examples
-        ).to.equal(examples);
-        const isValid = await Validate.test(response.result);
-        expect(isValid).to.be.true();
-
+        Helper.createServer({}, routes, (err, server) => {
+            server.inject({ url: '/swagger.json' }, function(response) {
+                expect(err).to.equal(null);
+                //console.log(JSON.stringify(response.result.paths['/store/'].post.responses));
+                expect(
+                    response.result.paths['/store/'].post.responses[200]
+                ).to.equal(undefined);
+                expect(
+                    response.result.paths['/store/'].post.responses[400]
+                        .description
+                ).to.equal('Bad Request');
+                expect(
+                    response.result.paths['/store/'].post.responses[400].headers
+                ).to.equal(headers);
+                expect(
+                    response.result.paths['/store/'].post.responses[400]
+                        .examples
+                ).to.equal(examples);
+                Helper.validate(response, done, expect);
+            });
+        });
     });
 
-    lab.test('using route base plugin override - object', async() => {
+    lab.test('using route base plugin override - object', done => {
         const routes = {
             method: 'POST',
             path: '/store/',
@@ -313,24 +324,26 @@ lab.experiment('responses', () => {
             }
         };
 
-        const server = await Helper.createServer({}, routes);
-        const response = await server.inject({ url: '/swagger.json' });
-        expect(
-            response.result.paths['/store/'].post.responses[200].schema
-        ).to.exist();
-        expect(
-            response.result.paths['/store/'].post.responses[400]
-                .description
-        ).to.equal('Bad Request');
-        expect(
-            response.result.paths['/store/'].post.responses[400].headers
-        ).to.equal(headers);
-        const isValid = await Validate.test(response.result);
-        expect(isValid).to.be.true();
-
+        Helper.createServer({}, routes, (err, server) => {
+            server.inject({ url: '/swagger.json' }, function(response) {
+                expect(err).to.equal(null);
+                //console.log(JSON.stringify(response.result));
+                expect(
+                    response.result.paths['/store/'].post.responses[200].schema
+                ).to.exist();
+                expect(
+                    response.result.paths['/store/'].post.responses[400]
+                        .description
+                ).to.equal('Bad Request');
+                expect(
+                    response.result.paths['/store/'].post.responses[400].headers
+                ).to.equal(headers);
+                Helper.validate(response, done, expect);
+            });
+        });
     });
 
-    lab.test('using route merging response and plugin override', async() => {
+    lab.test('using route merging response and plugin override', done => {
         const routes = {
             method: 'POST',
             path: '/store/',
@@ -355,33 +368,35 @@ lab.experiment('responses', () => {
             }
         };
 
-        const server = await Helper.createServer({}, routes);
-        const response = await server.inject({ url: '/swagger.json' });
-        expect(
-            response.result.paths['/store/'].post.responses[200].schema
-        ).to.exist();
-        expect(
-            response.result.paths['/store/'].post.responses[200]
-                .description
-        ).to.equal('Success its a 200');
-        expect(
-            response.result.paths['/store/'].post.responses[200][
-                'x-meta'
-            ]
-        ).to.equal('x-meta test data');
-        expect(
-            response.result.paths['/store/'].post.responses[200].schema
-        ).to.equal({
-            $ref: '#/definitions/Result'
+        Helper.createServer({}, routes, (err, server) => {
+            server.inject({ url: '/swagger.json' }, function(response) {
+                expect(err).to.equal(null);
+                //console.log(JSON.stringify(response.result));
+                expect(
+                    response.result.paths['/store/'].post.responses[200].schema
+                ).to.exist();
+                expect(
+                    response.result.paths['/store/'].post.responses[200]
+                        .description
+                ).to.equal('Success its a 200');
+                expect(
+                    response.result.paths['/store/'].post.responses[200][
+                        'x-meta'
+                    ]
+                ).to.equal('x-meta test data');
+                expect(
+                    response.result.paths['/store/'].post.responses[200].schema
+                ).to.equal({
+                    $ref: '#/definitions/Result'
+                });
+                Helper.validate(response, done, expect);
+            });
         });
-        const isValid = await Validate.test(response.result);
-        expect(isValid).to.be.true();
-
     });
 
     lab.test(
         'test a default response description is provided when no description is given',
-        async() => {
+        done => {
             const routes = {
                 method: 'POST',
                 path: '/store/',
@@ -400,18 +415,21 @@ lab.experiment('responses', () => {
                 }
             };
 
-            const server = await Helper.createServer({}, routes);
-            const response = await server.inject({ url: '/swagger.json' });
-            expect(
-                response.result.paths['/store/'].post.responses[200]
-                    .description
-            ).to.equal('Successful');
-            const isValid = await Validate.test(response.result);
-            expect(isValid).to.be.true();
+            Helper.createServer({}, routes, (err, server) => {
+                server.inject({ url: '/swagger.json' }, function(response) {
+                    expect(err).to.equal(null);
+                    //console.log(JSON.stringify(response.result));
+                    expect(
+                        response.result.paths['/store/'].post.responses[200]
+                            .description
+                    ).to.equal('Successful');
+                    Helper.validate(response, done, expect);
+                });
+            });
         }
     );
 
-    lab.test('using route base plugin override - array', async() => {
+    lab.test('using route base plugin override - array', done => {
         const routes = {
             method: 'POST',
             path: '/store/',
@@ -478,17 +496,9 @@ lab.experiment('responses', () => {
                 }
             }
         });
-        expect(
-            response.result.paths['/store/'].post.responses[400]
-                .description
-        ).to.equal('Bad Request');
-        expect(response.result.definitions.HTTP400).exists();
-        const isValid = await Validate.test(response.result);
-        expect(isValid).to.be.true();
-
     });
 
-    lab.test('failback to 200', async() => {
+    lab.test('failback to 200', done => {
         const routes = {
             method: 'POST',
             path: '/store/',
@@ -505,24 +515,26 @@ lab.experiment('responses', () => {
             }
         };
 
-        const server = await Helper.createServer({}, routes);
-        const response = await server.inject({ url: '/swagger.json' });
-        expect(
-            response.result.paths['/store/'].post.responses
-        ).to.equal({
-            default: {
-                schema: {
-                    type: 'string'
-                },
-                description: 'Successful'
-            }
+        Helper.createServer({}, routes, (err, server) => {
+            server.inject({ url: '/swagger.json' }, function(response) {
+                expect(err).to.equal(null);
+                //console.log(JSON.stringify(response.result));
+                expect(
+                    response.result.paths['/store/'].post.responses
+                ).to.equal({
+                    default: {
+                        schema: {
+                            type: 'string'
+                        },
+                        description: 'Successful'
+                    }
+                });
+                Helper.validate(response, done, expect);
+            });
         });
-        const isValid = await Validate.test(response.result);
-        expect(isValid).to.be.true();
-
     });
 
-    lab.test('No ownProperty', async() => {
+    lab.test('No ownProperty', done => {
         let objA = Helper.objWithNoOwnProperty();
         const objB = Helper.objWithNoOwnProperty();
         const objC = Helper.objWithNoOwnProperty();
@@ -557,9 +569,10 @@ lab.experiment('responses', () => {
             }
         });
 
+        done();
     });
 
-    lab.test('with same path but different method', async() => {
+    lab.test('with same path but different method', done => {
         const routes = [
             {
                 method: 'POST',
@@ -589,34 +602,36 @@ lab.experiment('responses', () => {
             }
         ];
 
-        const server = await Helper.createServer({}, routes);
-        const response = await server.inject({ url: '/swagger.json' });
-        expect(response.result.definitions['Model 1']).to.exist();
-        expect(response.result.definitions['Model 2']).to.exist();
-        expect(response.result.definitions).to.equal({
-            'Model 1': {
-                type: 'object',
-                properties: {
-                    value2222: {
-                        type: 'boolean'
+        Helper.createServer({}, routes, (err, server) => {
+            server.inject({ url: '/swagger.json' }, function(response) {
+                expect(err).to.equal(null);
+                //console.log(JSON.stringify(response.result.definitions));
+                expect(response.result.definitions['Model 1']).to.exist();
+                expect(response.result.definitions['Model 2']).to.exist();
+                expect(response.result.definitions).to.equal({
+                    'Model 1': {
+                        type: 'object',
+                        properties: {
+                            value2222: {
+                                type: 'boolean'
+                            }
+                        }
+                    },
+                    'Model 2': {
+                        type: 'object',
+                        properties: {
+                            value1111: {
+                                type: 'boolean'
+                            }
+                        }
                     }
-                }
-            },
-            'Model 2': {
-                type: 'object',
-                properties: {
-                    value1111: {
-                        type: 'boolean'
-                    }
-                }
-            }
+                });
+                Helper.validate(response, done, expect);
+            });
         });
-        const isValid = await Validate.test(response.result);
-        expect(isValid).to.be.true();
-
     });
 
-    lab.test('with deep labels', async() => {
+    lab.test('with deep labels', done => {
         const routes = [
             {
                 method: 'POST',
@@ -633,15 +648,17 @@ lab.experiment('responses', () => {
             }
         ];
 
-        const server = await Helper.createServer({}, routes);
-        const response = await server.inject({ url: '/swagger.json' });
-        expect(response.result.definitions.labelA).to.exist();
-        const isValid = await Validate.test(response.result);
-        expect(isValid).to.be.true();
-
+        Helper.createServer({}, routes, (err, server) => {
+            server.inject({ url: '/swagger.json' }, function(response) {
+                expect(err).to.equal(null);
+                //console.log(JSON.stringify(response.result.definitions));
+                expect(response.result.definitions.labelA).to.exist();
+                Helper.validate(response, done, expect);
+            });
+        });
     });
 
-    lab.test('array with required #249', async() => {
+    lab.test('array with required #249', done => {
         const dataPointSchema = Joi.object()
             .keys({
                 date: Joi.date().required(),
@@ -667,37 +684,39 @@ lab.experiment('responses', () => {
             }
         ];
 
-        const server = await Helper.createServer({}, routes);
-        const response = await server.inject({ url: '/swagger.json' });
-        expect(response.result.definitions.datapoint).to.exist();
-        expect(response.result.definitions).to.equal({
-            datapoint: {
-                properties: {
-                    date: {
-                        type: 'string',
-                        format: 'date'
+        Helper.createServer({}, routes, (err, server) => {
+            server.inject({ url: '/swagger.json' }, function(response) {
+                //console.log(JSON.stringify(response.result.definitions));
+                expect(err).to.equal(null);
+                expect(response.result.definitions.datapoint).to.exist();
+                expect(response.result.definitions).to.equal({
+                    datapoint: {
+                        properties: {
+                            date: {
+                                type: 'string',
+                                format: 'date'
+                            },
+                            value: {
+                                type: 'number'
+                            }
+                        },
+                        required: ['date', 'value'],
+                        type: 'object'
                     },
-                    value: {
-                        type: 'number'
+                    datapointlist: {
+                        type: 'array',
+                        items: {
+                            $ref: '#/definitions/datapoint'
+                        },
+                        required: ['datapoint']
                     }
-                },
-                required: ['date', 'value'],
-                type: 'object'
-            },
-            datapointlist: {
-                type: 'array',
-                items: {
-                    $ref: '#/definitions/datapoint'
-                },
-                required: ['datapoint']
-            }
+                });
+                Helper.validate(response, done, expect);
+            });
         });
-        const isValid = await Validate.test(response.result);
-        expect(isValid).to.be.true();
-
     });
 
-    lab.test('replace example with x-example for response', async() => {
+    lab.test('replace example with x-example for response', done => {
         const dataPointSchema = Joi.object()
             .keys({
                 date: Joi.date().required().example('2016-08-26'),
@@ -723,39 +742,41 @@ lab.experiment('responses', () => {
             }
         ];
 
-        const server = await Helper.createServer({}, routes);
-        const response = await server.inject({ url: '/swagger.json' });
-        expect(response.result.definitions.datapoint).to.exist();
-        expect(response.result.definitions).to.equal({
-            datapoint: {
-                properties: {
-                    date: {
-                        type: 'string',
-                        format: 'date',
-                        example: '2016-08-26'
+        Helper.createServer({}, routes, (err, server) => {
+            server.inject({ url: '/swagger.json' }, function(response) {
+                //console.log(JSON.stringify(response.result.definitions));
+                expect(err).to.equal(null);
+                expect(response.result.definitions.datapoint).to.exist();
+                expect(response.result.definitions).to.equal({
+                    datapoint: {
+                        properties: {
+                            date: {
+                                type: 'string',
+                                format: 'date',
+                                example: '2016-08-26'
+                            },
+                            value: {
+                                type: 'number',
+                                example: '1024'
+                            }
+                        },
+                        required: ['date', 'value'],
+                        type: 'object'
                     },
-                    value: {
-                        type: 'number',
-                        example: '1024'
+                    datapointlist: {
+                        type: 'array',
+                        items: {
+                            $ref: '#/definitions/datapoint'
+                        },
+                        required: ['datapoint']
                     }
-                },
-                required: ['date', 'value'],
-                type: 'object'
-            },
-            datapointlist: {
-                type: 'array',
-                items: {
-                    $ref: '#/definitions/datapoint'
-                },
-                required: ['datapoint']
-            }
+                });
+                Helper.validate(response, done, expect);
+            });
         });
-        const isValid = await Validate.test(response.result);
-        expect(isValid).to.be.true();
-
     });
 
-    lab.test('using hapi response.schema and plugin ', async() => {
+    lab.test('using hapi response.schema and plugin ', done => {
         const routes = {
             method: 'POST',
             path: '/store/',
@@ -775,30 +796,32 @@ lab.experiment('responses', () => {
             }
         };
 
-        const server = await Helper.createServer({}, routes);
-        const response = await server.inject({ url: '/swagger.json' });
-        expect(response.result.paths).to.equal({
-            '/store/': {
-                post: {
-                    operationId: 'postStore',
-                    tags: ['store'],
-                    responses: {
-                        '200': {
-                            schema: {
-                                $ref: '#/definitions/List'
-                            },
-                            description: 'Success with response.schema'
+        Helper.createServer({}, routes, (err, server) => {
+            server.inject({ url: '/swagger.json' }, function(response) {
+                //console.log(JSON.stringify(response.result.paths));
+                expect(err).to.equal(null);
+                expect(response.result.paths).to.equal({
+                    '/store/': {
+                        post: {
+                            operationId: 'postStore',
+                            tags: ['store'],
+                            responses: {
+                                '200': {
+                                    schema: {
+                                        $ref: '#/definitions/List'
+                                    },
+                                    description: 'Success with response.schema'
+                                }
+                            }
                         }
                     }
-                }
-            }
+                });
+                Helper.validate(response, done, expect);
+            });
         });
-        const isValid = await Validate.test(response.result);
-        expect(isValid).to.be.true();
-
     });
 
-    lab.test('using hapi response.schema and plugin mismatch', async() => {
+    lab.test('using hapi response.schema and plugin mismatch', done => {
         const routes = {
             method: 'POST',
             path: '/store/',
@@ -818,33 +841,35 @@ lab.experiment('responses', () => {
             }
         };
 
-        const server = await Helper.createServer({}, routes);
-        const response = await server.inject({ url: '/swagger.json' });
-        expect(response.result.paths).to.equal({
-            '/store/': {
-                post: {
-                    operationId: 'postStore',
-                    tags: ['store'],
-                    responses: {
-                        '200': {
-                            schema: {
-                                $ref: '#/definitions/List'
-                            },
-                            description: 'Successful'
-                        },
-                        '404': {
-                            description: 'Could not find a schema'
+        Helper.createServer({}, routes, (err, server) => {
+            server.inject({ url: '/swagger.json' }, function(response) {
+                //console.log(JSON.stringify(response.result.paths));
+                expect(err).to.equal(null);
+                expect(response.result.paths).to.equal({
+                    '/store/': {
+                        post: {
+                            operationId: 'postStore',
+                            tags: ['store'],
+                            responses: {
+                                '200': {
+                                    schema: {
+                                        $ref: '#/definitions/List'
+                                    },
+                                    description: 'Successful'
+                                },
+                                '404': {
+                                    description: 'Could not find a schema'
+                                }
+                            }
                         }
                     }
-                }
-            }
+                });
+                Helper.validate(response, done, expect);
+            });
         });
-        const isValid = await Validate.test(response.result);
-        expect(isValid).to.be.true();
-
     });
 
-    lab.test('using hapi response.schema and plugin mismatch', async() => {
+    lab.test('using hapi response.schema and plugin mismatch', done => {
         const routes = {
             method: 'POST',
             path: '/store/',
@@ -865,30 +890,33 @@ lab.experiment('responses', () => {
             }
         };
 
-        const server = await Helper.createServer({}, routes);
-        const response = await server.inject({ url: '/swagger.json' });
-        expect(response.result.paths).to.equal({
-            '/store/': {
-                post: {
-                    operationId: 'postStore',
-                    tags: ['store'],
-                    responses: {
-                        '200': {
-                            schema: {
-                                $ref: '#/definitions/Sum'
-                            },
-                            description: 'Success with response.schema'
+        Helper.createServer({}, routes, (err, server) => {
+            server.inject({ url: '/swagger.json' }, function(response) {
+                //console.log(JSON.stringify(response.result.paths));
+                expect(err).to.equal(null);
+                expect(response.result.paths).to.equal({
+                    '/store/': {
+                        post: {
+                            operationId: 'postStore',
+                            tags: ['store'],
+                            responses: {
+                                '200': {
+                                    schema: {
+                                        $ref: '#/definitions/Sum',
+                                        description: 'json body for sum'
+                                    },
+                                    description: 'Success with response.schema'
+                                }
+                            }
                         }
                     }
-                }
-            }
+                });
+                Helper.validate(response, done, expect);
+            });
         });
-        const isValid = await Validate.test(response.result);
-        expect(isValid).to.be.true();
-
     });
 
-    lab.test('using hapi response.schema and plugin mixed results', async() => {
+    lab.test('using hapi response.schema and plugin mixed results', done => {
         const routes = {
             method: 'POST',
             path: '/store/',
@@ -923,49 +951,53 @@ lab.experiment('responses', () => {
             }
         };
 
-        const server = await Helper.createServer({}, routes);
-        const response = await server.inject({ url: '/swagger.json' });
-        expect(response.result.paths).to.equal({
-            '/store/': {
-                post: {
-                    operationId: 'postStore',
-                    tags: ['store'],
-                    responses: {
-                        '200': {
-                            description: 'json body for sum',
-                            schema: {
-                                $ref: '#/definitions/Sum'
+        Helper.createServer({}, routes, (err, server) => {
+            server.inject({ url: '/swagger.json' }, function(response) {
+                //console.log(JSON.stringify(response.result.paths));
+                expect(err).to.equal(null);
+                expect(response.result.paths).to.equal({
+                    '/store/': {
+                        post: {
+                            operationId: 'postStore',
+                            tags: ['store'],
+                            responses: {
+                                '200': {
+                                    description: 'json body for sum',
+                                    schema: {
+                                        $ref: '#/definitions/Sum',
+                                        description: 'json body for sum'
+                                    }
+                                },
+                                '400': {
+                                    schema: {
+                                        $ref: '#/definitions/Model 1'
+                                    },
+                                    description:
+                                        '400 - Added from plugin-options'
+                                },
+                                '404': {
+                                    description:
+                                        '404 from response status object',
+                                    schema: {
+                                        $ref: '#/definitions/Model 1'
+                                    }
+                                },
+                                '429': {
+                                    schema: {
+                                        $ref: '#/definitions/Model 1'
+                                    },
+                                    description: 'Too Many Requests'
+                                },
+                                '500': {
+                                    description:
+                                        '500 - Added from plugin-options'
+                                }
                             }
-                        },
-                        '400': {
-                            schema: {
-                                $ref: '#/definitions/Model 1'
-                            },
-                            description:
-                                '400 - Added from plugin-options'
-                        },
-                        '404': {
-                            description:
-                                '404 from response status object',
-                            schema: {
-                                $ref: '#/definitions/Model 1'
-                            }
-                        },
-                        '429': {
-                            schema: {
-                                $ref: '#/definitions/Model 1'
-                            },
-                            description: 'Too Many Requests'
-                        },
-                        '500': {
-                            description:
-                                '500 - Added from plugin-options'
                         }
                     }
-                }
-            }
+                });
+                Helper.validate(response, done, expect);
+            });
         });
-        const isValid = await Validate.test(response.result);
-        expect(isValid).to.be.true();
     });
 });
