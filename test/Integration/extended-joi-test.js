@@ -173,7 +173,7 @@ lab.test('Boolean - hidden prop with specific valid options', async () => {
             tags: ['api'],
             validate: {
                 query: Joi.object({
-                    hiddenproperty: ExtendedBooleanJoi.boolean().valid('a','b').hidden(),
+                    hiddenproperty: ExtendedBooleanJoi.boolean().hidden(),
                 }),
             }
         }
