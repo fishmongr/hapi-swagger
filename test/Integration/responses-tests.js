@@ -429,7 +429,7 @@ lab.experiment('responses', () => {
         }
     );
 
-    lab.test('using route base plugin override - array', done => {
+    lab.test('using route base plugin override - array', async done => {
         const routes = {
             method: 'POST',
             path: '/store/',

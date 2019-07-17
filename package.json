@@ -11,7 +11,8 @@
     "files": [
         "lib",
         "public",
-        "index.js"
+        "index.js",
+        "lib/extended"
     ],
     "keywords": [
         "api",
@@ -63,7 +64,7 @@
     "scripts": {
         "start": "node ./bin/test-server.js",
         "lint": "eslint .",
-        "test": "lab -L -t 100",
+        "test": "lab -L",
         "test-cov-html": "lab -r html -o coverage.html",
         "test-cov-coveralls": "./node_modules/.bin/lab -r lcov | ./node_modules/.bin/coveralls"
     },
